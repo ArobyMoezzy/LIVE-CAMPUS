@@ -1,0 +1,7 @@
+<?php
+require_once 'config.php';login_required();
+if($_SERVER['REQUEST_METHOD']==='POST'){role_required(['admin','dosen']);$pdo->prepare("INSERT INTO pengumuman(judul,isi,pembuat_id) VALUES(?,?,?)")->execute([trim($_POST['judul']),trim($_POST['isi']),user()['id']]);flash('Pengumuman dipublikasikan.');redirect('pengumuman.php');}
+$rows=$pdo->query("SELECT p.*,u.nama FROM pengumuman p JOIN users u ON u.id=p.pembuat_id ORDER BY p.created_at DESC")->fetchAll();$page_title='Pengumuman';require 'includes/header.php'; ?>
+<div class="row g-4"><div class="col-lg-8"><h3>Papan pengumuman</h3><?php foreach($rows as $r): ?><div class="card-item mb-3"><div class="muted small"><?= date('d M Y H:i',strtotime($r['created_at'])) ?> · <?= e($r['nama']) ?></div><h5 class="mt-2"><?= e($r['judul']) ?></h5><p class="mb-0"><?= nl2br(e($r['isi'])) ?></p></div><?php endforeach; ?><?php if(!$rows): ?><p class="muted">Belum ada pengumuman.</p><?php endif; ?></div>
+<?php if(in_array(user()['role'],['admin','dosen'])): ?><div class="col-lg-4"><div class="form-card"><h4>Buat pengumuman</h4><form method="post" class="d-grid gap-3"><input name="judul" class="form-control" placeholder="Judul pengumuman" required><textarea name="isi" class="form-control" rows="5" placeholder="Isi pengumuman..." required></textarea><button class="btn btn-primary">Terbitkan</button></form></div></div><?php endif; ?></div>
+<?php require 'includes/footer.php'; ?>
